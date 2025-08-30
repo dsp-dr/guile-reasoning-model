@@ -13,6 +13,12 @@ from dataclasses import dataclass
 import json
 from collections import Counter
 import math
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import seaborn as sns
+import pandas as pd
+import numpy as np
+from datetime import datetime
 
 
 @dataclass
@@ -500,6 +506,246 @@ def test_metric_sensitivity():
     return base_scores, variations
 
 
+def create_evaluation_dashboard(chains: List[ReasoningChain], metrics: ReasoningMetrics, 
+                               save_path: str = None):
+    """Create comprehensive evaluation metrics dashboard"""
+    fig = plt.figure(figsize=(20, 16))
+    
+    # Calculate all metrics for all chains
+    all_scores = [metrics.evaluate_all(chain) for chain in chains]
+    
+    # 1. Metrics Distribution (2x2 grid, top left)
+    ax1 = plt.subplot(4, 4, 1)
+    metric_names = ['accuracy', 'coherence', 'completeness', 'efficiency']
+    metric_data = []
+    
+    for metric in metric_names:
+        values = [scores[metric] for scores in all_scores]
+        metric_data.extend([(metric, val) for val in values])
+    
+    df_metrics = pd.DataFrame(metric_data, columns=['Metric', 'Score'])
+    sns.boxplot(data=df_metrics, x='Metric', y='Score', ax=ax1)
+    ax1.set_title('Metric Score Distributions', fontsize=12, weight='bold')
+    ax1.set_ylim(0, 1)
+    plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
+    
+    # 2. Composite Score Scatter (top middle)
+    ax2 = plt.subplot(4, 4, 2)
+    composite_scores = [scores['composite_score'] for scores in all_scores]
+    accuracies = [scores['accuracy'] for scores in all_scores]
+    
+    colors = ['green' if acc == 1 else 'red' for acc in accuracies]
+    ax2.scatter(range(len(composite_scores)), composite_scores, c=colors, alpha=0.7)
+    ax2.set_xlabel('Chain Index')
+    ax2.set_ylabel('Composite Score')
+    ax2.set_title('Composite Scores by Chain', fontsize=12, weight='bold')
+    ax2.grid(True, alpha=0.3)
+    
+    # 3. Correlation Heatmap (top right)
+    ax3 = plt.subplot(4, 4, 3)
+    metric_matrix = []
+    for metric1 in metric_names:
+        row = []
+        for metric2 in metric_names:
+            values1 = [scores[metric1] for scores in all_scores]
+            values2 = [scores[metric2] for scores in all_scores]
+            corr = calculate_correlation(values1, values2)
+            row.append(corr)
+        metric_matrix.append(row)
+    
+    sns.heatmap(metric_matrix, annot=True, cmap='coolwarm', center=0,
+                xticklabels=metric_names, yticklabels=metric_names, ax=ax3)
+    ax3.set_title('Metric Correlations', fontsize=12, weight='bold')
+    
+    # 4. Performance by Chain Length (top right corner)
+    ax4 = plt.subplot(4, 4, 4)
+    chain_lengths = [len(chain.steps) for chain in chains]
+    ax4.scatter(chain_lengths, composite_scores, alpha=0.7, c=colors)
+    ax4.set_xlabel('Number of Steps')
+    ax4.set_ylabel('Composite Score')
+    ax4.set_title('Performance vs Chain Length', fontsize=12, weight='bold')
+    ax4.grid(True, alpha=0.3)
+    
+    # 5. Accuracy Distribution (middle left)
+    ax5 = plt.subplot(4, 4, 5)
+    accuracy_counts = Counter(accuracies)
+    ax5.pie(accuracy_counts.values(), labels=['Incorrect', 'Correct'], 
+            autopct='%1.1f%%', colors=['red', 'green'])
+    ax5.set_title('Accuracy Distribution', fontsize=12, weight='bold')
+    
+    # 6. Coherence vs Completeness (middle middle)
+    ax6 = plt.subplot(4, 4, 6)
+    coherence_scores = [scores['coherence'] for scores in all_scores]
+    completeness_scores = [scores['completeness'] for scores in all_scores]
+    
+    ax6.scatter(coherence_scores, completeness_scores, c=colors, alpha=0.7, s=60)
+    ax6.set_xlabel('Coherence')
+    ax6.set_ylabel('Completeness') 
+    ax6.set_title('Coherence vs Completeness', fontsize=12, weight='bold')
+    ax6.grid(True, alpha=0.3)
+    
+    # Add diagonal line
+    ax6.plot([0, 1], [0, 1], 'k--', alpha=0.3)
+    
+    # 7. Efficiency Analysis (middle right)
+    ax7 = plt.subplot(4, 4, 7)
+    efficiency_scores = [scores['efficiency'] for scores in all_scores]
+    
+    # Bin by efficiency ranges
+    eff_ranges = ['Low (0-0.33)', 'Med (0.33-0.67)', 'High (0.67-1.0)']
+    eff_counts = [
+        sum(1 for e in efficiency_scores if 0 <= e < 0.33),
+        sum(1 for e in efficiency_scores if 0.33 <= e < 0.67),
+        sum(1 for e in efficiency_scores if 0.67 <= e <= 1.0)
+    ]
+    
+    bars = ax7.bar(eff_ranges, eff_counts, color=['red', 'orange', 'green'], alpha=0.7)
+    ax7.set_ylabel('Count')
+    ax7.set_title('Efficiency Distribution', fontsize=12, weight='bold')
+    plt.setp(ax7.xaxis.get_majorticklabels(), rotation=45)
+    
+    # Add value labels
+    for bar, count in zip(bars, eff_counts):
+        ax7.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
+                str(count), ha='center', va='bottom')
+    
+    # 8. Metric Radar Chart (middle right corner)
+    ax8 = plt.subplot(4, 4, 8, projection='polar')
+    
+    # Average scores across all chains
+    avg_scores = {
+        metric: statistics.mean(scores[metric] for scores in all_scores)
+        for metric in metric_names
+    }
+    
+    categories = list(avg_scores.keys())
+    values = list(avg_scores.values())
+    
+    # Complete the circle
+    angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False)
+    values += values[:1]
+    angles = np.concatenate((angles, [angles[0]]))
+    
+    ax8.plot(angles, values, 'o-', linewidth=2, alpha=0.7)
+    ax8.fill(angles, values, alpha=0.25)
+    ax8.set_xticks(angles[:-1])
+    ax8.set_xticklabels(categories)
+    ax8.set_ylim(0, 1)
+    ax8.set_title('Average Metric Performance', fontsize=12, weight='bold', pad=20)
+    
+    # 9-12. Individual metric histograms (bottom row)
+    for i, metric in enumerate(metric_names):
+        ax = plt.subplot(4, 4, 9+i)
+        values = [scores[metric] for scores in all_scores]
+        
+        ax.hist(values, bins=10, alpha=0.7, color='skyblue', edgecolor='navy')
+        ax.axvline(statistics.mean(values), color='red', linestyle='--', 
+                  label=f'Mean: {statistics.mean(values):.2f}')
+        ax.set_xlabel(metric.title())
+        ax.set_ylabel('Frequency')
+        ax.set_title(f'{metric.title()} Distribution', fontsize=10, weight='bold')
+        ax.legend()
+        ax.set_xlim(0, 1)
+    
+    plt.suptitle('🎯 Reasoning Evaluation Metrics Dashboard', 
+                 fontsize=18, weight='bold', y=0.98)
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.95)
+    
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight', facecolor='white')
+        print(f"Evaluation dashboard saved to {save_path}")
+    
+    return fig
+
+
+def create_sample_chain_quality(quality: str) -> ReasoningChain:
+    """Create sample chain based on quality level"""
+    if quality == 'excellent':
+        return ReasoningChain(
+            problem="What is 20% of 150?",
+            steps=[
+                "Convert percentage to decimal: 20% = 0.20",
+                "Multiply by the number: 0.20 × 150",
+                "Calculate: 0.20 × 150 = 30",
+                "Verify: 30 is 20% of 150"
+            ],
+            final_answer="30",
+            expected_answer="30"
+        )
+    elif quality == 'good':
+        return ReasoningChain(
+            problem="What is 20% of 150?",
+            steps=[
+                "20% as decimal is 0.2",
+                "0.2 × 150 = 30"
+            ],
+            final_answer="30",
+            expected_answer="30"
+        )
+    elif quality == 'fair':
+        return ReasoningChain(
+            problem="What is 20% of 150?", 
+            steps=["20% of 150 is 30"],
+            final_answer="30",
+            expected_answer="30"
+        )
+    else:  # poor
+        return ReasoningChain(
+            problem="What is 20% of 150?",
+            steps=[],
+            final_answer="25",  # Wrong answer
+            expected_answer="30"
+        )
+
+
+def create_live_evaluation_demo():
+    """Create a live evaluation demo with sample chains"""
+    print("\n" + "="*60)
+    print("🎯 LIVE EVALUATION METRICS DASHBOARD")
+    print("="*60)
+    
+    # Generate sample reasoning chains with different quality levels
+    sample_chains = []
+    
+    # High quality chains
+    for i in range(5):
+        sample_chains.append(create_sample_chain_quality('excellent'))
+    
+    # Medium quality chains  
+    for i in range(8):
+        sample_chains.append(create_sample_chain_quality('good'))
+    
+    # Lower quality chains
+    for i in range(4):
+        sample_chains.append(create_sample_chain_quality('fair'))
+    
+    # Poor quality chains
+    for i in range(3):
+        sample_chains.append(create_sample_chain_quality('poor'))
+    
+    metrics = ReasoningMetrics()
+    
+    # Create dashboard
+    dashboard_fig = create_evaluation_dashboard(
+        sample_chains, metrics, 'demo_evaluation_dashboard.png'
+    )
+    
+    # Calculate summary statistics
+    all_scores = [metrics.evaluate_all(chain) for chain in sample_chains]
+    
+    avg_composite = statistics.mean(s['composite_score'] for s in all_scores)
+    accuracy_rate = statistics.mean(s['accuracy'] for s in all_scores) 
+    
+    print(f"\n📊 Dashboard Summary:")
+    print(f"  Total chains analyzed: {len(sample_chains)}")
+    print(f"  Average composite score: {avg_composite:.3f}")
+    print(f"  Overall accuracy rate: {accuracy_rate:.1%}")
+    print(f"  Dashboard saved: demo_evaluation_dashboard.png")
+    
+    return dashboard_fig, sample_chains
+
+
 def main():
     """Run evaluation metrics experiment"""
     print("=" * 60)
@@ -514,6 +760,9 @@ def main():
     
     # Test sensitivity
     base_scores, variations = test_metric_sensitivity()
+    
+    # Create live demo dashboard
+    create_live_evaluation_demo()
     
     # Save results
     results = {

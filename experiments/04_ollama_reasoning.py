@@ -12,6 +12,14 @@ import time
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass, asdict
 import statistics
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import seaborn as sns
+import pandas as pd
+import numpy as np
+from datetime import datetime
+import threading
+import queue
 
 
 @dataclass
@@ -432,6 +440,173 @@ def benchmark_performance():
     return {}
 
 
+def visualize_real_time_reasoning(client: OllamaClient, problem: str, 
+                                 expected_answer: str, save_path: str = None):
+    """Create real-time reasoning visualization"""
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(16, 12))
+    
+    experiment = ReasoningExperiment(client)
+    
+    # Test multiple prompt styles
+    styles = ['zero_shot', 'structured', 'self_check', 'think_aloud']
+    style_results = {}
+    
+    print(f"🧠 Analyzing problem: {problem[:60]}...")
+    
+    for style in styles:
+        start_time = time.time()
+        result = experiment.test_reasoning_problem(problem, expected_answer, style)
+        
+        if result['success']:
+            style_results[style] = {
+                'correct': result['is_correct'],
+                'response_time': result['response_time'],
+                'steps': len(result['reasoning_steps']),
+                'response': result.get('model_output', '')
+            }
+            print(f"  {style}: {'✓' if result['is_correct'] else '✗'} ({result['response_time']:.1f}s)")
+    
+    # 1. Accuracy comparison
+    accuracies = [1 if style_results[s]['correct'] else 0 for s in styles if s in style_results]
+    style_names = [s for s in styles if s in style_results]
+    
+    colors = ['green' if acc else 'red' for acc in accuracies]
+    bars = ax1.bar(style_names, accuracies, color=colors, alpha=0.7)
+    ax1.set_ylabel('Accuracy (0/1)')
+    ax1.set_title('Prompt Style Accuracy', fontsize=14, weight='bold')
+    ax1.set_ylim(0, 1.2)
+    
+    # Add checkmarks/X marks
+    for bar, acc in zip(bars, accuracies):
+        symbol = '✓' if acc else '✗'
+        ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.05,
+                symbol, ha='center', va='bottom', fontsize=20, weight='bold')
+    
+    plt.setp(ax1.xaxis.get_majorticklabels(), rotation=45)
+    
+    # 2. Response time comparison
+    response_times = [style_results[s]['response_time'] for s in style_names]
+    ax2.bar(style_names, response_times, color='steelblue', alpha=0.7)
+    ax2.set_ylabel('Response Time (seconds)')
+    ax2.set_title('Response Time by Style', fontsize=14, weight='bold')
+    
+    for i, (bar, time_val) in enumerate(zip(ax2.patches, response_times)):
+        ax2.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.05,
+                f'{time_val:.1f}s', ha='center', va='bottom')
+    
+    plt.setp(ax2.xaxis.get_majorticklabels(), rotation=45)
+    
+    # 3. Reasoning steps count
+    step_counts = [style_results[s]['steps'] for s in style_names]
+    ax3.bar(style_names, step_counts, color='darkorange', alpha=0.7)
+    ax3.set_ylabel('Number of Reasoning Steps')
+    ax3.set_title('Reasoning Depth', fontsize=14, weight='bold')
+    
+    for i, (bar, steps) in enumerate(zip(ax3.patches, step_counts)):
+        ax3.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.1,
+                str(steps), ha='center', va='bottom')
+    
+    plt.setp(ax3.xaxis.get_majorticklabels(), rotation=45)
+    
+    # 4. Response quality heatmap
+    metrics_data = []
+    for style in style_names:
+        row = [
+            1 if style_results[style]['correct'] else 0,  # Accuracy
+            min(style_results[style]['response_time'] / 5, 1),  # Time (normalized)
+            min(style_results[style]['steps'] / 10, 1)  # Steps (normalized)
+        ]
+        metrics_data.append(row)
+    
+    metrics_df = pd.DataFrame(metrics_data, 
+                             columns=['Accuracy', 'Time\n(norm)', 'Steps\n(norm)'],
+                             index=style_names)
+    
+    sns.heatmap(metrics_df, annot=True, cmap='RdYlGn', ax=ax4, 
+                cbar_kws={'label': 'Performance Score'})
+    ax4.set_title('Performance Heatmap', fontsize=14, weight='bold')
+    
+    plt.suptitle(f'Real-time Reasoning Analysis\nProblem: {problem[:80]}...', 
+                 fontsize=16, weight='bold', y=0.95)
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.9)
+    
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        print(f"Real-time reasoning visualization saved to {save_path}")
+    
+    return fig, style_results
+
+
+def create_live_demo(client: OllamaClient):
+    """Interactive live demo of reasoning capabilities"""
+    print("\n" + "="*60)
+    print("🚀 LIVE OLLAMA REASONING DEMO")
+    print("="*60)
+    
+    demo_problems = [
+        ("What is 15% of 200?", "30"),
+        ("If John has 3 apples and gives away 1, then buys 4 more, how many does he have?", "6"),
+        ("A car travels 120 miles in 2 hours. What is its average speed?", "60"),
+        ("If today is Wednesday, what day will it be in 10 days?", "Saturday")
+    ]
+    
+    for i, (problem, answer) in enumerate(demo_problems, 1):
+        print(f"\n🎯 Demo Problem {i}/4")
+        print(f"Problem: {problem}")
+        print(f"Expected: {answer}")
+        print("-" * 40)
+        
+        if client.check_connection():
+            fig, results = visualize_real_time_reasoning(
+                client, problem, answer, f'demo_live_{i}.png'
+            )
+            
+            # Show summary
+            correct_count = sum(1 for r in results.values() if r['correct'])
+            avg_time = statistics.mean(r['response_time'] for r in results.values())
+            
+            print(f"✓ Results: {correct_count}/{len(results)} correct")
+            print(f"⏱️  Avg time: {avg_time:.1f}s")
+            
+        else:
+            print("❌ Ollama not available - using mock visualization")
+            create_mock_reasoning_viz(problem, answer, f'demo_live_{i}.png')
+        
+        print("=" * 40)
+    
+    print("\n🎉 Live demo complete! Generated visualizations:")
+    for i in range(1, 5):
+        print(f"  - demo_live_{i}.png")
+
+
+def create_mock_reasoning_viz(problem: str, answer: str, save_path: str):
+    """Create mock visualization when Ollama unavailable"""
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Mock data
+    styles = ['zero_shot', 'structured', 'self_check', 'think_aloud']
+    mock_accuracies = [0, 1, 1, 1]  # First one "fails" for realism
+    
+    colors = ['red' if acc == 0 else 'green' for acc in mock_accuracies]
+    bars = ax.bar(styles, mock_accuracies, color=colors, alpha=0.7)
+    
+    ax.set_ylabel('Accuracy')
+    ax.set_title(f'Mock Reasoning Results\n{problem[:60]}...', fontsize=14, weight='bold')
+    ax.set_ylim(0, 1.2)
+    
+    for bar, acc in zip(bars, mock_accuracies):
+        symbol = '✓' if acc else '✗'
+        ax.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.05,
+                symbol, ha='center', va='bottom', fontsize=20, weight='bold')
+    
+    plt.setp(ax.xaxis.get_majorticklabels(), rotation=45)
+    plt.tight_layout()
+    
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+
 def main():
     """Run Ollama reasoning experiment"""
     print("=" * 60)
@@ -465,6 +640,9 @@ def main():
             ("If today is Tuesday, what day was it 3 days ago?", "Saturday")
         ]
         comparison = experiment.compare_models(test_problems)
+    
+    # Run live demo
+    create_live_demo(client)
     
     # Save results
     results = {
