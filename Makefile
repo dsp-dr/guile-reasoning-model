@@ -89,6 +89,16 @@ clean-python:
 	rm -rf experiments/output_*
 	rm -rf experiments/*.json
 
+# Book Decomposition for Agent Processing
+decompose-book:
+	@echo "Decomposing book for agent processing..."
+	@bash scripts/decompose-book.sh
+
+agent-preview:
+	@echo "Previewing decomposed sections..."
+	@ls -la decomp/sections/ 2>/dev/null || echo "Run 'make decompose-book' first"
+	@ls -la decomp/focus-areas/ 2>/dev/null || echo "Focus areas not created yet"
+
 # Help
 help:
 	@echo "Reasoning Model Project"
@@ -105,6 +115,10 @@ help:
 	@echo "  make pdf-analyze - Analyze PDF structure"
 	@echo "  make pdf-toc     - Extract table of contents"
 	@echo "  make pdf-split   - Split PDF by chapters"
+	@echo ""
+	@echo "Book Decomposition:"
+	@echo "  make decompose-book - Decompose book for agent processing"
+	@echo "  make agent-preview  - Preview decomposed sections"
 	@echo ""
 	@echo "Experiments:"
 	@echo "  make exp01       - PDF splitter validation"

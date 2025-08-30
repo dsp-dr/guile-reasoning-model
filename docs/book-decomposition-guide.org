@@ -1,0 +1,288 @@
+#+TITLE: Book Decomposition Guide for Agent Processing
+#+AUTHOR: dsp-dr
+#+DATE: 2025-08-30
+
+* Overview
+
+This guide explains how to decompose "Build a Reasoning Model (From Scratch)" into smaller, agent-friendly chunks for parallel processing, task subdivision, and implementation workflow.
+
+* Source Material
+
+** Main PDF
+- Location: =tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf=
+- Total pages: 94
+- Format: MEAP (Manning Early Access Program)
+- Status: Chapters 1-2 complete, 3-6 planned
+
+** Already Extracted Parts
+Current decomposition in =output/=:
+- =part_001=: Full MEAP content (94 pages)
+- =part_002=: Section 2.4 - Preparing input texts for LLMs
+- =part_003=: Section 2.9 - Faster inference via PyTorch model compilation
+- =part_004=: Appendix C.6 - Main model code
+
+* Decomposition Strategies
+
+** By Chapter (Recommended for Agents)
+
+#+BEGIN_SRC bash
+# Extract individual chapters
+./pdf-splitter.py split "tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf" \
+  --by-chapter \
+  --output-dir decomp/chapters/
+#+END_SRC
+
+Creates:
+- =decomp/chapters/chapter-01-understanding-reasoning-models.pdf=
+- =decomp/chapters/chapter-02-generating-text.pdf=
+- =decomp/chapters/appendix-a-references.pdf=
+
+** By Section (Fine-grained Agent Tasks)
+
+#+BEGIN_SRC bash
+# Extract by major sections for parallel agent processing
+./pdf-splitter.py split "tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf" \
+  --max-pages 5 \
+  --preserve-section-boundaries \
+  --output-dir decomp/sections/
+#+END_SRC
+
+Creates 5-page chunks respecting section boundaries:
+- =section-01-1.1-defining-reasoning.pdf=
+- =section-02-1.2-training-pipeline.pdf=
+- =section-03-1.3-pattern-matching.pdf=
+- etc.
+
+** By Implementation Focus
+
+For agent specialization by implementation area:
+
+#+BEGIN_SRC bash
+# Create focused extracts for specific implementation areas
+mkdir -p decomp/focus-areas/
+
+# Tokenization focus
+./pdf-splitter.py extract-pages "tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf" \
+  --pages "25-35" \
+  --output "decomp/focus-areas/tokenization.pdf"
+
+# Generation focus  
+./pdf-splitter.py extract-pages "tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf" \
+  --pages "36-50" \
+  --output "decomp/focus-areas/generation.pdf"
+
+# KV Caching focus
+./pdf-splitter.py extract-pages "tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf" \
+  --pages "51-65" \
+  --output "decomp/focus-areas/kv-caching.pdf"
+#+END_SRC
+
+* Image Extraction for Visual Analysis
+
+** Convert to Images for Agent Vision
+
+#+BEGIN_SRC bash
+# Convert each page to high-res images for visual analysis
+mkdir -p decomp/images/pages/
+
+# Using ImageMagick
+for i in {1..94}; do
+  magick "tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf[$(($i-1))]" \
+    -density 300 -quality 95 \
+    "decomp/images/pages/page-$(printf "%03d" $i).png"
+done
+
+# Create thumbnails for quick overview
+mkdir -p decomp/images/thumbs/
+for img in decomp/images/pages/*.png; do
+  basename=$(basename "$img" .png)
+  magick "$img" -thumbnail 200x260 "decomp/images/thumbs/${basename}-thumb.png"
+done
+#+END_SRC
+
+** Extract Diagrams and Code Blocks
+
+#+BEGIN_SRC bash
+# Extract just diagrams and code for focused analysis
+mkdir -p decomp/images/diagrams/
+mkdir -p decomp/images/code/
+
+# This would require custom script to identify diagram/code regions
+python3 scripts/extract-visual-elements.py \
+  --input "tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf" \
+  --diagrams-dir "decomp/images/diagrams/" \
+  --code-dir "decomp/images/code/"
+#+END_SRC
+
+* Agent Task Subdivision Strategy
+
+** Parallel Processing Workflow
+
+1. **Chapter-level Agents** (Coarse-grained)
+   #+BEGIN_EXAMPLE
+   Agent A: Chapter 1 → Conceptual framework → src/theory/
+   Agent B: Chapter 2 → Core implementation → src/tokenizer/, src/model/
+   Agent C: Chapter 3 → Evaluation → src/evaluation/
+   Agent D: Chapter 4 → Inference → src/inference/
+   #+END_EXAMPLE
+
+2. **Section-level Agents** (Fine-grained)
+   #+BEGIN_EXAMPLE
+   Agent A1: Section 1.1 → Reasoning definitions
+   Agent A2: Section 1.2 → Training pipeline
+   Agent B1: Section 2.4 → Tokenization
+   Agent B2: Section 2.5 → Model loading
+   Agent B3: Section 2.6-2.7 → Generation
+   Agent B4: Section 2.8 → KV caching
+   #+END_EXAMPLE
+
+3. **Implementation-focused Agents** (By component)
+   #+BEGIN_EXAMPLE
+   TokenAgent: All tokenization content → Complete tokenizer
+   ModelAgent: All model content → Complete model interface  
+   GenAgent: All generation content → Complete generation system
+   EvalAgent: All evaluation content → Complete evaluation framework
+   #+END_EXAMPLE
+
+** Agent Input/Output Specification
+
+Each agent receives:
+- PDF section(s) relevant to their task
+- Page images for visual elements
+- Previous agents' outputs (dependencies)
+- Task-specific prompts and constraints
+
+Each agent produces:
+- Guile Scheme implementation files
+- Tests for their components
+- Documentation explaining their approach
+- Integration points with other components
+
+* Automation Scripts
+
+** Complete Decomposition Pipeline
+
+#+BEGIN_SRC bash
+#!/bin/bash
+# decompose-book.sh - Full decomposition pipeline
+
+SOURCE_PDF="tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf"
+DECOMP_DIR="decomp"
+
+# Setup directories
+mkdir -p $DECOMP_DIR/{chapters,sections,focus-areas,images/{pages,thumbs,diagrams,code}}
+
+# Chapter-level splits
+./pdf-splitter.py split "$SOURCE_PDF" --by-chapter --output-dir "$DECOMP_DIR/chapters/"
+
+# Section-level splits  
+./pdf-splitter.py split "$SOURCE_PDF" --max-pages 5 --output-dir "$DECOMP_DIR/sections/"
+
+# Convert to images
+for i in {1..94}; do
+  magick "$SOURCE_PDF[$(($i-1))]" -density 300 "$DECOMP_DIR/images/pages/page-$(printf "%03d" $i).png"
+  magick "$DECOMP_DIR/images/pages/page-$(printf "%03d" $i).png" -thumbnail 200x260 \
+    "$DECOMP_DIR/images/thumbs/page-$(printf "%03d" $i)-thumb.png"
+done
+
+echo "Decomposition complete in $DECOMP_DIR/"
+#+END_SRC
+
+** Agent Coordination Makefile
+
+#+BEGIN_SRC makefile
+# Add to main Makefile
+.PHONY: decompose-book agent-tasks
+
+decompose-book:
+	@echo "Decomposing book for agent processing..."
+	@bash scripts/decompose-book.sh
+
+agent-chapter-1:
+	@echo "Processing Chapter 1 with specialized agent..."
+	claude --project-dir=. --input="decomp/chapters/chapter-01.pdf" \
+	  --prompt="Implement Chapter 1 concepts in Guile" \
+	  --output-dir="src/theory/"
+
+agent-chapter-2:
+	@echo "Processing Chapter 2 with specialized agent..."  
+	claude --project-dir=. --input="decomp/chapters/chapter-02.pdf" \
+	  --prompt="Implement Chapter 2 tokenization and generation in Guile" \
+	  --output-dir="src/"
+
+agent-tasks: agent-chapter-1 agent-chapter-2
+#+END_SRC
+
+* Best Practices for Agent Processing
+
+** Chunking Guidelines
+
+1. **Semantic Boundaries**: Split at logical breakpoints (sections, subsections)
+2. **Size Limits**: Keep chunks under 10 pages for focused processing
+3. **Context Preservation**: Include necessary context from previous sections
+4. **Cross-references**: Maintain links between related chunks
+
+** Agent Prompt Templates
+
+*** Chapter-level Agent Prompt
+#+BEGIN_EXAMPLE
+You are implementing Chapter {N} of "Build a Reasoning Model (From Scratch)" in Guile Scheme.
+
+Input: PDF pages {start}-{end} covering {topic}
+Context: Previous implementations in src/
+Task: Create idiomatic Guile modules for {specific_components}
+
+Requirements:
+- Follow existing code style and patterns
+- Include comprehensive tests  
+- Document design decisions
+- Integrate with existing modules
+
+Output: Complete implementation with tests and documentation.
+#+END_EXAMPLE
+
+*** Section-level Agent Prompt  
+#+BEGIN_EXAMPLE
+You are implementing Section {N.N} focusing on {topic}.
+
+Input: PDF section + relevant code examples
+Dependencies: {list_of_required_modules}
+Task: Implement {specific_function/feature}
+
+Focus on:
+- Functional programming approach
+- Integration with module {X}
+- Performance considerations
+- Edge case handling
+
+Output: Single module with tests.
+#+END_EXAMPLE
+
+* Directory Structure
+
+After decomposition:
+
+#+BEGIN_EXAMPLE
+decomp/
+├── chapters/           # Chapter-level PDFs
+├── sections/           # Section-level PDFs (5-10 pages each)
+├── focus-areas/        # Implementation-focused extracts
+├── images/
+│   ├── pages/         # Full-resolution page images
+│   ├── thumbs/        # Thumbnail images
+│   ├── diagrams/      # Extracted diagrams
+│   └── code/          # Extracted code blocks
+└── metadata/          # Extraction metadata and indexes
+#+END_EXAMPLE
+
+* Integration with Project Workflow
+
+The decomposed materials feed into:
+
+1. **Development**: Individual modules based on sections
+2. **Testing**: Validation against book examples
+3. **Documentation**: Section-by-section implementation notes
+4. **Examples**: Working code from book demonstrations
+5. **Benchmarks**: Performance comparisons with reference implementations
+
+This systematic decomposition enables parallel development by multiple agents while maintaining coherence and avoiding duplication.
