@@ -3,9 +3,67 @@
 #+DATE: 2025-08-30
 #+OPTIONS: toc:2 num:t
 
+#+HTML: <div align="right"><a href="static/images/book-cover.png"><img src="static/images/book-cover-thumb.png" alt="Build a Reasoning Model (From Scratch)" /></a></div>
+
 * Overview
 
 The Guile Reasoning Model is an advanced symbolic reasoning framework implemented in GNU Guile Scheme. This project explores the intersection of functional programming, logic programming, and artificial intelligence to create a flexible and extensible reasoning system capable of complex inference, knowledge representation, and automated theorem proving.
+
+*Note*: This implementation anticipates chapters 3-6 of the book based on standard reasoning model architectures. We're building in parallel with the author's work, taking creative liberties to explore functional programming approaches to reasoning.
+
+** Implementation Dependency Graph
+
+#+begin_src mermaid
+graph TD
+    %% Chapter 1: Foundations
+    A[Chapter 1: Conceptual Foundation] --> B[Chapter 2: Text Generation]
+    
+    %% Chapter 2: Core Implementation
+    B --> C[2.4 Tokenization]
+    B --> D[2.5 Model Loading]
+    B --> E[2.6-7 Generation]
+    B --> F[2.8 KV Cache]
+    
+    %% Chapter 3: Evaluation (Anticipated)
+    C --> G[3.1 Perplexity]
+    E --> G
+    G --> H[3.2 BLEU/ROUGE]
+    G --> I[3.3 Reasoning Metrics]
+    I --> J[3.4 Benchmarks]
+    
+    %% Chapter 4: Inference Scaling (Anticipated)
+    E --> K[4.1 Batching]
+    F --> K
+    K --> L[4.2 Speculative Decoding]
+    K --> M[4.3 Chain-of-Thought]
+    M --> N[4.4 Tree-of-Thoughts]
+    M --> O[4.5 Self-Consistency]
+    
+    %% Chapter 5: RL Training (Anticipated)
+    I --> P[5.1 Reward Models]
+    P --> Q[5.2 PPO/RLHF]
+    Q --> R[5.3 Constitutional AI]
+    M --> P
+    
+    %% Chapter 6: Distillation (Anticipated)
+    D --> S[6.1 Teacher Models]
+    S --> T[6.2 Knowledge Transfer]
+    T --> U[6.3 Compression]
+    Q --> T
+    
+    %% Cross-chapter dependencies
+    I --> M
+    J --> Q
+    O --> R
+    N --> R
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style G fill:#ff9,stroke:#333,stroke-width:2px
+    style K fill:#9ff,stroke:#333,stroke-width:2px
+    style P fill:#9f9,stroke:#333,stroke-width:2px
+    style S fill:#f99,stroke:#333,stroke-width:2px
+#+end_src
 
 ** Key Features
 
