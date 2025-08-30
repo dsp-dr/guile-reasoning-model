@@ -38,3 +38,4 @@ logs/
 # Experiments
 experiments/*.json
 experiments/output_*
+chapters/
