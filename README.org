@@ -3,11 +3,22 @@
 #+DATE: 2025-08-30
 #+OPTIONS: toc:2 num:t
 
+#+HTML: <div align="center">
+
+[[https://img.shields.io/badge/Guile-3.0%2B-blue.svg][https://img.shields.io/badge/Guile-3.0%2B-blue.svg]]
+[[https://img.shields.io/badge/License-MIT-green.svg][https://img.shields.io/badge/License-MIT-green.svg]]
+[[https://img.shields.io/badge/Status-Experimental-orange.svg][https://img.shields.io/badge/Status-Experimental-orange.svg]]
+[[https://img.shields.io/badge/Book-MEAP-red.svg][https://img.shields.io/badge/Book-MEAP-red.svg]]
+
+#+HTML: </div>
+
 #+HTML: <div align="right"><a href="static/images/book-cover.png"><img src="static/images/book-cover-thumb.png" alt="Build a Reasoning Model (From Scratch)" /></a></div>
 
 * Overview
 
 The Guile Reasoning Model is an advanced symbolic reasoning framework implemented in GNU Guile Scheme. This project explores the intersection of functional programming, logic programming, and artificial intelligence to create a flexible and extensible reasoning system capable of complex inference, knowledge representation, and automated theorem proving.
+
+Based on [[https://www.manning.com/books/build-a-reasoning-model-from-scratch]["Build a Reasoning Model (From Scratch)"]] by Sebastian Raschka (Manning Publications, MEAP).
 
 *Note*: This implementation anticipates chapters 3-6 of the book based on standard reasoning model architectures. We're building in parallel with the author's work, taking creative liberties to explore functional programming approaches to reasoning.
 
