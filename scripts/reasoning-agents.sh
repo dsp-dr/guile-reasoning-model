@@ -13,7 +13,7 @@ AGENT_TASKS=(
 
 # Create tmux sessions for each agent
 create_agent_sessions() {
-    echo "🤖 Creating reasoning model agent sessions..."
+    echo "🤖 Creating reasoning model agent sessions with Claude Code..."
     
     for task in "${AGENT_TASKS[@]}"; do
         IFS=":" read -r session command <<< "$task"
@@ -25,7 +25,14 @@ create_agent_sessions() {
             
             # Set working directory to project root
             tmux send-keys -t "$session:work" "cd /home/dsp-dr/ghq/github.com/dsp-dr/guile-reasoning-model" C-m
-            tmux send-keys -t "$session:work" "echo 'Agent $session ready. Waiting for commands...'" C-m
+            
+            # Start Claude Code in each session
+            tmux send-keys -t "$session:work" "claude" C-m
+            
+            # Wait a moment for Claude to start
+            sleep 2
+            
+            echo "Session $session ready with Claude Code"
         else
             echo "Session $session already exists"
         fi
@@ -41,8 +48,9 @@ run_agent_loop() {
             IFS=":" read -r session command <<< "$task"
             if tmux has-session -t "$session" 2>/dev/null; then
                 echo "[$(date +%H:%M:%S)] Sending task to $session"
+                # Send task as a message to Claude Code
                 tmux send-keys -t "$session:work" "$command" C-m
-                sleep 5  # Give each agent time to work
+                sleep 10  # Give each agent more time to work with Claude
             fi
         done
         
