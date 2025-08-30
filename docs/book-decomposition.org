@@ -1,0 +1,147 @@
+#+TITLE: Book Decomposition Structure
+#+AUTHOR: dsp-dr
+#+DATE: 2025-08-30
+
+* Book Information
+
+- Title: Build a Reasoning Model (From Scratch) v1 MEAP
+- Author: Sebastian Raschka
+- Total Pages: 94
+- Status: MEAP (Manning Early Access Program)
+
+* Chapter Breakdown
+
+** Chapter 1: Understanding reasoning models
+*** 1.1 Defining reasoning in the context of LLMs
+*** 1.2 Understanding the standard LLM training pipeline
+*** 1.3 Modeling language through pattern matching
+*** 1.4 Simulating reasoning without explicit rules
+*** 1.5 Improving reasoning with training and inference techniques
+*** 1.6 Building reasoning models from scratch
+*** 1.7 A roadmap to reasoning models from scratch
+*** 1.8 Summary
+
+** Chapter 2: Generating text with a pre-trained LLM
+*** 2.1 Introduction to LLMs for text generation
+*** 2.2 Setting up the coding environment
+*** 2.3 Understanding hardware needs and recommendations
+*** 2.4 Preparing input texts for LLMs
+*** 2.5 Loading pre-trained models
+*** 2.6 Understanding the sequential LLM text generation process
+*** 2.7 Coding a minimal text generation function
+*** 2.8 Faster inference via KV caching
+*** 2.9 Faster inference via PyTorch model compilation
+*** 2.10 Summary
+
+** Chapter 3: Evaluation [Not yet in MEAP]
+- Planned content for evaluation metrics and benchmarking
+
+** Chapter 4: Inference Scaling [Not yet in MEAP]
+- Planned content for scaling inference techniques
+
+** Chapter 5: Training with Reinforcement Learning [Not yet in MEAP]
+- Planned content for RL-based training methods
+
+** Chapter 6: Distillation [Not yet in MEAP]
+- Planned content for model distillation techniques
+
+** Appendices
+*** Appendix A: References and further reading
+- Chapter 1 References and Further Reading
+- Chapter 2 References and Further Reading
+
+*** Appendix B: [Expected] Hardware and Setup
+*** Appendix C: Main model code
+
+* Guile Implementation Mapping
+
+** Chapter 1 → Conceptual Foundation
+| Section | Guile Module | Status |
+|---------|--------------|--------|
+| 1.1 Reasoning definitions | docs/theory.org | Planned |
+| 1.2 Training pipeline | src/training/base.scm | Planned |
+| 1.3 Pattern matching | src/patterns/matcher.scm | Planned |
+| 1.4 Implicit reasoning | src/inference/implicit.scm | Planned |
+| 1.5 Training techniques | src/training/techniques.scm | Planned |
+| 1.6 From scratch approach | README.org | Complete |
+| 1.7 Roadmap | presentations/book-to-guile-decomposition.org | Complete |
+
+** Chapter 2 → Core Implementation
+| Section | Guile Module | Status |
+|---------|--------------|--------|
+| 2.1 Text generation intro | docs/generation-overview.org | Planned |
+| 2.2 Environment setup | README.org | Complete |
+| 2.3 Hardware requirements | docs/implementation-notes.org | Complete |
+| 2.4 Input preparation | src/tokenizer/base.scm | Started |
+| 2.5 Model loading | src/model/base.scm | Started |
+| 2.6 Sequential generation | src/generation/basic.scm | Started |
+| 2.7 Minimal generation | examples/basic-generation.scm | Started |
+| 2.8 KV caching | src/generation/kv-cache.scm | Started |
+| 2.9 Compilation | Not applicable (interpreted) | N/A |
+
+** Chapter 3 → Testing Framework
+| Topic | Guile Module | Status |
+|-------|--------------|--------|
+| Unit tests | tests/tokenizer-test.scm | Started |
+| Integration tests | tests/integration/ | Planned |
+| Benchmarks | benchmarks/ | Directory created |
+| Test runner | run-tests.scm | Complete |
+
+** Chapter 4 → Advanced Inference
+| Topic | Guile Module | Status |
+|-------|--------------|--------|
+| Inference scaling | src/inference/scaling.scm | Planned |
+| Chain-of-thought | examples/cot-reasoning.scm | Started |
+| Batching | src/inference/batching.scm | Planned |
+| Optimization | src/inference/optimize.scm | Planned |
+
+** Chapter 5 → Training
+| Topic | Guile Module | Status |
+|-------|--------------|--------|
+| RL basics | src/training/reinforcement.scm | Planned |
+| Reward models | src/training/rewards.scm | Planned |
+| PPO implementation | src/training/ppo.scm | Planned |
+| Training loop | src/training/loop.scm | Planned |
+
+** Chapter 6 → Distillation
+| Topic | Guile Module | Status |
+|-------|--------------|--------|
+| Knowledge distillation | src/distillation/knowledge.scm | Planned |
+| Teacher-student | src/distillation/teacher-student.scm | Planned |
+| Compression | src/distillation/compress.scm | Planned |
+
+* Decomposition Files
+
+Currently extracted parts in output/:
+1. Part 001: Full MEAP V01 content
+2. Part 002: Section 2.4 - Preparing input texts for LLMs
+3. Part 003: Section 2.9 - Faster inference via PyTorch model compilation  
+4. Part 004: Appendix C.6 - Main model code
+
+* Next Steps
+
+1. [ ] Implement tokenizer based on Chapter 2.4
+2. [ ] Complete model loading interface (Chapter 2.5)
+3. [ ] Enhance text generation with proper algorithms (Chapter 2.6-2.7)
+4. [ ] Optimize KV caching implementation (Chapter 2.8)
+5. [ ] Create comprehensive test suite
+6. [ ] Document each module thoroughly
+7. [ ] Add examples for each major concept
+
+* Tools and Resources
+
+- PDF Splitter: pdf-splitter.py (custom tool for decomposition)
+- Configuration: split-config.yaml
+- Original PDF: tmp/Build_a_Reasoning_Model_(From_Scratch)_v1_MEAP.pdf
+- Output directory: output/
+
+* Implementation Progress Tracker
+
+| Component | Design | Implementation | Tests | Documentation |
+|-----------|--------|----------------|-------|---------------|
+| Tokenizer | ✓ | Started | Started | Planned |
+| Model Base | ✓ | Started | Planned | Planned |
+| Generation | ✓ | Started | Planned | Planned |
+| KV Cache | ✓ | Started | Planned | Planned |
+| Examples | ✓ | Started | N/A | In progress |
+| Build System | ✓ | Complete | N/A | Complete |
