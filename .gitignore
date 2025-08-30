@@ -1,0 +1,40 @@
+# Temporary files
+tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+
+# PDF processing
+output/
+split_pdfs/
+*.split.pdf
+*.chapter*.pdf
+
+# Configuration
+config.local.yaml
+split-config.yaml
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Experiments
+experiments/*.json
+experiments/output_*

@@ -1,0 +1,781 @@
+#+TITLE: Reasoning Model Implementation Guide
+#+AUTHOR: Test Author
+#+DATE: 2025-08-30
+#+OPTIONS: toc:2 num:t
+
+* Preface
+:PROPERTIES:
+:CUSTOM_ID: preface
+:END:
+
+This document serves as a comprehensive test for PDF splitting and processing tools. It contains multiple chapters with varying content lengths, cross-references, and complex structure to validate our PDF processing pipeline.
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+* Table of Contents
+:PROPERTIES:
+:CUSTOM_ID: toc
+:END:
+
+** Part I: Foundations
+- Chapter 1: Introduction to Reasoning Models ..................... 5
+- Chapter 2: Mathematical Foundations ............................ 23  
+- Chapter 3: Neural Network Basics ............................... 45
+
+** Part II: Implementation
+- Chapter 4: Building the Core Architecture ...................... 67
+- Chapter 5: Training Pipeline Design ............................ 89
+- Chapter 6: Optimization Techniques ............................ 111
+
+** Part III: Advanced Topics  
+- Chapter 7: Chain-of-Thought Reasoning ........................ 133
+- Chapter 8: Reinforcement Learning Integration ................. 155
+- Chapter 9: Knowledge Distillation ............................. 177
+
+** Part IV: Applications
+- Chapter 10: Real-World Use Cases ............................. 199
+
+* Part I: Foundations
+:PROPERTIES:
+:CUSTOM_ID: part1
+:END:
+
+** Chapter 1: Introduction to Reasoning Models
+:PROPERTIES:
+:CUSTOM_ID: ch1
+:END:
+
+*** 1.1 What is Reasoning?
+
+Reasoning in artificial intelligence refers to the systematic process by which a model generates intermediate steps to arrive at conclusions. Unlike simple pattern matching, reasoning involves:
+
+1. Problem decomposition
+2. Step-by-step analysis
+3. Logical inference
+4. Verification of intermediate results
+
+#+BEGIN_SRC python
+def simple_reasoning_example(problem):
+    """Demonstrates basic reasoning steps"""
+    # Step 1: Parse the problem
+    parsed = parse_problem(problem)
+    
+    # Step 2: Generate intermediate steps
+    steps = []
+    for component in parsed.components:
+        step_result = analyze_component(component)
+        steps.append(step_result)
+    
+    # Step 3: Combine results
+    final_answer = combine_steps(steps)
+    return final_answer
+#+END_SRC
+
+*** 1.2 Historical Context
+
+The development of reasoning models has evolved through several key phases:
+
+| Year | Milestone | Impact Score | Reference |
+|------+-----------+--------------+-----------|
+| 1956 | Logic Theorist | 8.5 | [[#ref1][Newell & Simon]] |
+| 1972 | PROLOG | 7.8 | [[#ref2][Colmerauer]] |
+| 1986 | Backpropagation | 9.2 | [[#ref3][Rumelhart]] |
+| 2017 | Transformer | 9.8 | [[#ref4][Vaswani et al.]] |
+| 2022 | Chain-of-Thought | 9.5 | [[#ref5][Wei et al.]] |
+
+*** 1.3 Core Components
+
+**** 1.3.1 Input Processing
+
+The first stage involves tokenization and encoding:
+
+$$P(w_i | w_{i-1}, ..., w_1) = \frac{\exp(s(w_i))}{\sum_{w'}\exp(s(w'))}$$
+
+Where $s(w_i)$ represents the score function for word $w_i$.
+
+**** 1.3.2 Attention Mechanisms
+
+Multi-head attention allows the model to focus on different aspects:
+
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V$$
+
+**** 1.3.3 Output Generation
+
+The final stage involves decoding and post-processing the generated tokens.
+
+*** 1.4 Implementation Considerations
+
+When implementing reasoning models, consider:
+
+- *Memory requirements*: Modern models require significant GPU memory
+- *Computational complexity*: $O(n^2)$ for self-attention
+- *Training data*: Quality matters more than quantity
+- *Evaluation metrics*: Beyond perplexity to reasoning benchmarks
+
+See [[#ch4][Chapter 4]] for detailed implementation guidelines.
+
+** Chapter 2: Mathematical Foundations
+:PROPERTIES:
+:CUSTOM_ID: ch2
+:END:
+
+*** 2.1 Linear Algebra Essentials
+
+Understanding vectors, matrices, and tensors is crucial:
+
+#+BEGIN_EXAMPLE
+Vector: [1, 2, 3, 4, 5]
+Matrix: [[1, 2, 3],
+         [4, 5, 6],
+         [7, 8, 9]]
+Tensor: Shape (batch_size, sequence_length, hidden_dim)
+#+END_EXAMPLE
+
+*** 2.2 Probability Theory
+
+Bayesian inference forms the theoretical foundation:
+
+$$P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}$$
+
+*** 2.3 Information Theory
+
+Entropy and cross-entropy are key concepts:
+
+$$H(X) = -\sum_{i} P(x_i) \log P(x_i)$$
+
+*** 2.4 Optimization Methods
+
+Common optimization algorithms include:
+
+1. Stochastic Gradient Descent (SGD)
+2. Adam optimizer
+3. RMSprop
+4. AdaGrad
+
+Each has trade-offs in terms of convergence speed and stability.
+
+*** 2.5 Regularization Techniques
+
+Preventing overfitting through:
+
+- L1/L2 regularization
+- Dropout
+- Early stopping
+- Data augmentation
+
+** Chapter 3: Neural Network Basics
+:PROPERTIES:
+:CUSTOM_ID: ch3
+:END:
+
+*** 3.1 Perceptron Model
+
+The simplest neural unit:
+
+#+BEGIN_SRC python
+class Perceptron:
+    def __init__(self, input_dim):
+        self.weights = np.random.randn(input_dim)
+        self.bias = 0
+    
+    def forward(self, x):
+        return activation(np.dot(self.weights, x) + self.bias)
+#+END_SRC
+
+*** 3.2 Feedforward Networks
+
+Multiple layers of neurons:
+
+- Input layer
+- Hidden layers (1 or more)
+- Output layer
+
+*** 3.3 Backpropagation Algorithm
+
+Computing gradients through the chain rule:
+
+$$\frac{\partial L}{\partial w_{ij}} = \frac{\partial L}{\partial a_j} \cdot \frac{\partial a_j}{\partial w_{ij}}$$
+
+*** 3.4 Activation Functions
+
+Common choices and their properties:
+
+| Function | Range | Derivative | Use Case |
+|----------+-------+------------+----------|
+| ReLU | [0, ∞) | 0 or 1 | Hidden layers |
+| Sigmoid | (0, 1) | σ(1-σ) | Binary classification |
+| Tanh | (-1, 1) | 1-tanh² | RNNs |
+| Softmax | (0, 1) | Complex | Multi-class |
+
+*** 3.5 Training Dynamics
+
+Understanding loss landscapes and convergence:
+
+- Local minima vs global minima
+- Saddle points
+- Learning rate scheduling
+- Batch normalization effects
+
+* Part II: Implementation
+:PROPERTIES:
+:CUSTOM_ID: part2
+:END:
+
+** Chapter 4: Building the Core Architecture
+:PROPERTIES:
+:CUSTOM_ID: ch4
+:END:
+
+*** 4.1 System Design Overview
+
+The architecture consists of several key modules:
+
+#+BEGIN_SRC python
+class ReasoningModel:
+    def __init__(self, config):
+        self.encoder = TransformerEncoder(config)
+        self.decoder = TransformerDecoder(config)
+        self.reasoning_module = ChainOfThought(config)
+        self.output_head = OutputProjection(config)
+#+END_SRC
+
+*** 4.2 Encoder Implementation
+
+The encoder processes input sequences:
+
+1. Token embedding
+2. Positional encoding
+3. Multi-head attention
+4. Feed-forward network
+5. Layer normalization
+
+*** 4.3 Decoder Architecture
+
+Generating output with autoregressive decoding:
+
+- Masked self-attention
+- Cross-attention to encoder outputs
+- Causal masking for generation
+
+*** 4.4 Memory Management
+
+Efficient memory usage through:
+
+- Gradient checkpointing
+- Mixed precision training
+- Attention caching
+- Key-value compression
+
+*** 4.5 Distributed Training
+
+Scaling to multiple GPUs:
+
+#+BEGIN_SRC bash
+# Launch distributed training
+torchrun --nproc_per_node=4 train.py \
+    --model_name reasoning_v1 \
+    --batch_size 32 \
+    --learning_rate 1e-4
+#+END_SRC
+
+** Chapter 5: Training Pipeline Design
+:PROPERTIES:
+:CUSTOM_ID: ch5
+:END:
+
+*** 5.1 Data Preparation
+
+Creating high-quality training datasets:
+
+- Data collection strategies
+- Annotation guidelines
+- Quality control measures
+- Synthetic data generation
+
+*** 5.2 Preprocessing Pipeline
+
+#+BEGIN_SRC python
+def preprocess_data(raw_text):
+    # Tokenization
+    tokens = tokenizer.encode(raw_text)
+    
+    # Truncation/Padding
+    tokens = pad_sequence(tokens, max_length=512)
+    
+    # Special tokens
+    tokens = add_special_tokens(tokens)
+    
+    return tokens
+#+END_SRC
+
+*** 5.3 Training Loop
+
+Core training implementation:
+
+#+BEGIN_SRC python
+for epoch in range(num_epochs):
+    for batch in dataloader:
+        optimizer.zero_grad()
+        
+        # Forward pass
+        outputs = model(batch.input_ids)
+        loss = criterion(outputs, batch.labels)
+        
+        # Backward pass
+        loss.backward()
+        optimizer.step()
+        
+        # Logging
+        wandb.log({"loss": loss.item()})
+#+END_SRC
+
+*** 5.4 Hyperparameter Tuning
+
+Key parameters to optimize:
+
+| Parameter | Range | Default | Impact |
+|-----------+-------+---------+--------|
+| Learning Rate | 1e-5 to 1e-3 | 1e-4 | High |
+| Batch Size | 8 to 128 | 32 | Medium |
+| Warmup Steps | 0 to 10000 | 1000 | Medium |
+| Weight Decay | 0 to 0.1 | 0.01 | Low |
+
+*** 5.5 Monitoring and Debugging
+
+Tools for training visibility:
+
+- TensorBoard integration
+- Weights & Biases logging
+- Gradient flow visualization
+- Attention pattern analysis
+
+** Chapter 6: Optimization Techniques
+:PROPERTIES:
+:CUSTOM_ID: ch6
+:END:
+
+*** 6.1 Gradient Optimization
+
+Advanced gradient techniques:
+
+- Gradient clipping
+- Gradient accumulation
+- Adaptive learning rates
+- Second-order methods
+
+*** 6.2 Model Compression
+
+Reducing model size:
+
+1. Quantization (INT8, INT4)
+2. Pruning (structured/unstructured)
+3. Knowledge distillation
+4. Neural architecture search
+
+*** 6.3 Inference Optimization
+
+Speeding up inference:
+
+#+BEGIN_SRC python
+# JIT compilation
+model = torch.jit.script(model)
+
+# ONNX export
+torch.onnx.export(model, dummy_input, "model.onnx")
+
+# TensorRT optimization
+trt_model = torch2trt(model)
+#+END_SRC
+
+*** 6.4 Memory Optimization
+
+Reducing memory footprint:
+
+- Flash attention
+- Paged attention
+- Ring attention
+- Sliding window attention
+
+*** 6.5 Profiling and Benchmarking
+
+Performance analysis tools:
+
+#+BEGIN_SRC bash
+# Profile with PyTorch
+python -m torch.profiler profile.py
+
+# Memory profiling
+python -m memory_profiler train.py
+
+# GPU utilization
+nvidia-smi dmon -s um
+#+END_SRC
+
+* Part III: Advanced Topics
+:PROPERTIES:
+:CUSTOM_ID: part3
+:END:
+
+** Chapter 7: Chain-of-Thought Reasoning
+:PROPERTIES:
+:CUSTOM_ID: ch7
+:END:
+
+*** 7.1 CoT Prompting Strategies
+
+Effective prompt engineering:
+
+#+BEGIN_EXAMPLE
+Question: What is 235 * 18?
+
+Let's solve this step by step:
+1. Break down: 235 * 18 = 235 * (10 + 8)
+2. First part: 235 * 10 = 2350
+3. Second part: 235 * 8 = 1880
+4. Add results: 2350 + 1880 = 4230
+
+Answer: 4230
+#+END_EXAMPLE
+
+*** 7.2 Self-Consistency
+
+Sampling multiple reasoning paths:
+
+#+BEGIN_SRC python
+def self_consistency(model, prompt, num_samples=5):
+    responses = []
+    for _ in range(num_samples):
+        response = model.generate(prompt, temperature=0.7)
+        responses.append(response)
+    
+    # Majority voting
+    return most_common_answer(responses)
+#+END_SRC
+
+*** 7.3 Tree-of-Thoughts
+
+Exploring reasoning branches:
+
+- Breadth-first search
+- Depth-first search
+- Monte Carlo tree search
+- Beam search strategies
+
+*** 7.4 Verification Methods
+
+Checking reasoning validity:
+
+1. Logical consistency checks
+2. Mathematical verification
+3. Fact checking
+4. Self-critique mechanisms
+
+*** 7.5 Reasoning Metrics
+
+Evaluating reasoning quality:
+
+| Metric | Description | Range |
+|--------+-------------+-------|
+| Coherence | Logical flow | 0-1 |
+| Completeness | All steps present | 0-1 |
+| Correctness | Final answer accuracy | 0-1 |
+| Efficiency | Step minimization | 0-1 |
+
+** Chapter 8: Reinforcement Learning Integration
+:PROPERTIES:
+:CUSTOM_ID: ch8
+:END:
+
+*** 8.1 RL Fundamentals
+
+Core concepts:
+
+- States, actions, rewards
+- Policy and value functions
+- Exploration vs exploitation
+- Temporal difference learning
+
+*** 8.2 Reward Modeling
+
+Designing effective reward functions:
+
+#+BEGIN_SRC python
+def compute_reward(prediction, ground_truth):
+    # Correctness reward
+    correct_reward = 1.0 if prediction == ground_truth else 0.0
+    
+    # Efficiency penalty
+    length_penalty = -0.01 * len(prediction)
+    
+    # Coherence bonus
+    coherence_bonus = evaluate_coherence(prediction) * 0.5
+    
+    return correct_reward + length_penalty + coherence_bonus
+#+END_SRC
+
+*** 8.3 Policy Gradient Methods
+
+REINFORCE algorithm implementation:
+
+$$\nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta}[G_t \nabla_\theta \log \pi_\theta(a_t|s_t)]$$
+
+*** 8.4 PPO for LLMs
+
+Proximal Policy Optimization adaptation:
+
+- Clipped objective function
+- Value function estimation
+- Advantage estimation
+- KL divergence constraints
+
+*** 8.5 Online Learning
+
+Continuous improvement strategies:
+
+1. Experience replay
+2. Curriculum learning
+3. Active learning
+4. Human-in-the-loop feedback
+
+** Chapter 9: Knowledge Distillation
+:PROPERTIES:
+:CUSTOM_ID: ch9
+:END:
+
+*** 9.1 Teacher-Student Framework
+
+Setting up distillation:
+
+#+BEGIN_SRC python
+class DistillationLoss(nn.Module):
+    def __init__(self, alpha=0.5, temperature=3.0):
+        super().__init__()
+        self.alpha = alpha
+        self.temperature = temperature
+        
+    def forward(self, student_logits, teacher_logits, labels):
+        # Distillation loss
+        distill_loss = kl_divergence(
+            F.softmax(student_logits / self.temperature),
+            F.softmax(teacher_logits / self.temperature)
+        )
+        
+        # Standard loss
+        student_loss = F.cross_entropy(student_logits, labels)
+        
+        return self.alpha * distill_loss + (1 - self.alpha) * student_loss
+#+END_SRC
+
+*** 9.2 Synthetic Data Generation
+
+Creating training data from teacher models:
+
+- Temperature sampling
+- Nucleus sampling
+- Diverse prompt generation
+- Quality filtering
+
+*** 9.3 Progressive Distillation
+
+Multi-stage compression:
+
+1. Large teacher → Medium model
+2. Medium model → Small model
+3. Ensemble distillation
+4. Cross-architecture transfer
+
+*** 9.4 Distillation Metrics
+
+Measuring transfer effectiveness:
+
+- Knowledge retention rate
+- Performance degradation
+- Inference speedup
+- Model size reduction
+
+*** 9.5 Advanced Techniques
+
+State-of-the-art methods:
+
+- Feature matching
+- Attention transfer
+- Relational knowledge distillation
+- Adversarial distillation
+
+* Part IV: Applications
+:PROPERTIES:
+:CUSTOM_ID: part4
+:END:
+
+** Chapter 10: Real-World Use Cases
+:PROPERTIES:
+:CUSTOM_ID: ch10
+:END:
+
+*** 10.1 Mathematical Problem Solving
+
+Applications in education:
+
+#+BEGIN_EXAMPLE
+Problem: A train travels 120 km in 2 hours. If it maintains the same speed, how long will it take to travel 300 km?
+
+Reasoning:
+1. Calculate speed: 120 km ÷ 2 hours = 60 km/h
+2. Time for 300 km: 300 km ÷ 60 km/h = 5 hours
+
+Answer: 5 hours
+#+END_EXAMPLE
+
+*** 10.2 Code Generation
+
+Programming assistance:
+
+#+BEGIN_SRC python
+# Generated implementation
+def fibonacci(n):
+    """
+    Generate Fibonacci sequence up to n terms.
+    
+    Reasoning:
+    1. Base cases: F(0) = 0, F(1) = 1
+    2. Recursive relation: F(n) = F(n-1) + F(n-2)
+    3. Iterative approach for efficiency
+    """
+    if n <= 0:
+        return []
+    elif n == 1:
+        return [0]
+    
+    sequence = [0, 1]
+    for i in range(2, n):
+        sequence.append(sequence[-1] + sequence[-2])
+    
+    return sequence
+#+END_SRC
+
+*** 10.3 Scientific Research
+
+Hypothesis generation and validation:
+
+1. Literature review automation
+2. Experiment design
+3. Data analysis
+4. Result interpretation
+
+*** 10.4 Business Intelligence
+
+Decision support systems:
+
+| Use Case | Reasoning Type | Accuracy |
+|----------+---------------+----------|
+| Sales Forecasting | Temporal | 92% |
+| Risk Assessment | Probabilistic | 88% |
+| Customer Segmentation | Clustering | 85% |
+| Fraud Detection | Anomaly | 94% |
+
+*** 10.5 Healthcare Applications
+
+Medical reasoning systems:
+
+- Diagnosis assistance
+- Treatment planning
+- Drug interaction checking
+- Clinical trial matching
+
+* Appendices
+:PROPERTIES:
+:CUSTOM_ID: appendices
+:END:
+
+** Appendix A: Mathematical Notation
+
+| Symbol | Meaning | Example |
+|--------+---------+---------|
+| ∇ | Gradient | ∇f(x) |
+| Σ | Summation | Σᵢ xᵢ |
+| Π | Product | Πᵢ xᵢ |
+| ∈ | Element of | x ∈ ℝ |
+| ⊂ | Subset | A ⊂ B |
+
+** Appendix B: Code Repository Structure
+
+#+BEGIN_EXAMPLE
+reasoning-model/
+├── src/
+│   ├── models/
+│   ├── training/
+│   ├── evaluation/
+│   └── utils/
+├── experiments/
+├── data/
+├── configs/
+└── tests/
+#+END_EXAMPLE
+
+** Appendix C: Benchmarks
+
+Performance on standard datasets:
+
+| Dataset | Metric | Score |
+|---------+--------+-------|
+| GSM8K | Accuracy | 87.3% |
+| MATH | Accuracy | 62.1% |
+| HumanEval | Pass@1 | 74.2% |
+| MMLU | Average | 79.8% |
+
+* References
+:PROPERTIES:
+:CUSTOM_ID: references
+:END:
+
+** Core Papers
+:PROPERTIES:
+:CUSTOM_ID: ref1
+:END:
+
+1. Newell, A., & Simon, H. A. (1956). The logic theory machine.
+
+:PROPERTIES:
+:CUSTOM_ID: ref2
+:END:
+
+2. Colmerauer, A. (1972). Prolog language specification.
+
+:PROPERTIES:
+:CUSTOM_ID: ref3
+:END:
+
+3. Rumelhart, D. E., Hinton, G. E., & Williams, R. J. (1986). Learning representations by back-propagating errors.
+
+:PROPERTIES:
+:CUSTOM_ID: ref4
+:END:
+
+4. Vaswani, A., et al. (2017). Attention is all you need.
+
+:PROPERTIES:
+:CUSTOM_ID: ref5
+:END:
+
+5. Wei, J., et al. (2022). Chain-of-thought prompting elicits reasoning in large language models.
+
+* Index
+:PROPERTIES:
+:CUSTOM_ID: index
+:END:
+
+- Activation functions, [[#ch3][45]]
+- Attention mechanisms, [[#ch1][12]]
+- Backpropagation, [[#ch3][51]]
+- Chain-of-thought, [[#ch7][133]]
+- Distillation, [[#ch9][177]]
+- Gradient descent, [[#ch2][31]]
+- Inference optimization, [[#ch6][125]]
+- Knowledge transfer, [[#ch9][182]]
+- Loss functions, [[#ch5][95]]
+- Memory management, [[#ch4][78]]
+- Neural networks, [[#ch3][45]]
+- Optimization, [[#ch6][111]]
+- Reinforcement learning, [[#ch8][155]]
+- Training pipeline, [[#ch5][89]]
+- Transformers, [[#ch4][67]]
