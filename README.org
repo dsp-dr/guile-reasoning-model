@@ -13,10 +13,11 @@
 
 The Guile Reasoning Model is an advanced symbolic reasoning framework implemented in GNU Guile Scheme. This project explores the intersection of functional programming, logic programming, and artificial intelligence to create a flexible and extensible reasoning system capable of complex inference, knowledge representation, and automated theorem proving.
 
-#+ATTR_HTML: :align right
-[[file:static/images/book-cover.png][file:static/images/book-cover-thumb.png]]
 
 Based on [[https://www.manning.com/books/build-a-reasoning-model-from-scratch]["Build a Reasoning Model (From Scratch)"]] by Sebastian Raschka (Manning Publications, MEAP).
+
+#+ATTR_HTML: :align right
+[[file:static/images/book-cover.png][file:static/images/book-cover-thumb.png]]
 
 *Note*: This implementation anticipates chapters 3-6 of the book based on standard reasoning model architectures. We're building in parallel with the author's work, taking creative liberties to explore functional programming approaches to reasoning.
 
