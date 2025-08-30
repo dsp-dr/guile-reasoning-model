@@ -1,0 +1,234 @@
+#+TITLE: Guile Reasoning Model
+#+AUTHOR: dsp-dr
+#+DATE: 2025-08-30
+#+OPTIONS: toc:2 num:t
+
+* Overview
+
+The Guile Reasoning Model is an advanced symbolic reasoning framework implemented in GNU Guile Scheme. This project explores the intersection of functional programming, logic programming, and artificial intelligence to create a flexible and extensible reasoning system capable of complex inference, knowledge representation, and automated theorem proving.
+
+** Key Features
+
+- *Symbolic Reasoning Engine*: Core inference engine supporting forward chaining, backward chaining, and bidirectional reasoning
+- *Knowledge Representation*: Flexible ontology system with support for facts, rules, and constraints
+- *Logic Programming Integration*: Seamless integration with miniKanren for relational programming
+- *Pattern Matching*: Advanced pattern matching and unification algorithms
+- *Explanation Generation*: Transparent reasoning chains with detailed explanation capabilities
+- *Parallel Processing*: Concurrent reasoning strategies for improved performance
+- *Extensible Architecture*: Plugin system for custom reasoning strategies and domain-specific extensions
+
+* Installation
+
+** Prerequisites
+
+- GNU Guile 3.0 or later
+- GNU Make (gmake on FreeBSD)
+- Git
+
+** Quick Start
+
+#+BEGIN_SRC bash
+# Clone the repository
+git clone https://github.com/dsp-dr/guile-reasoning-model.git
+cd guile-reasoning-model
+
+# Build the project
+gmake all
+
+# Run tests
+gmake test
+
+# Start interactive REPL
+gmake repl
+#+END_SRC
+
+* Project Structure
+
+#+BEGIN_EXAMPLE
+guile-reasoning-model/
+├── src/               # Core reasoning engine implementation
+│   ├── core/         # Core data structures and algorithms
+│   ├── inference/    # Inference engines and strategies
+│   ├── knowledge/    # Knowledge representation modules
+│   └── utils/        # Utility functions and helpers
+├── lib/              # External libraries and dependencies
+├── tests/            # Test suite
+├── experiments/      # Experimental features and prototypes
+├── research/         # Research notes and theoretical foundations
+├── benchmarks/       # Performance benchmarks
+├── examples/         # Usage examples and tutorials
+├── docs/            # Documentation
+└── Makefile         # Build automation
+#+END_EXAMPLE
+
+* Usage
+
+** Basic Example
+
+#+BEGIN_SRC scheme
+(use-modules (reasoning core)
+             (reasoning inference)
+             (knowledge base))
+
+;; Create a knowledge base
+(define kb (make-knowledge-base))
+
+;; Add facts
+(add-fact! kb '(parent alice bob))
+(add-fact! kb '(parent bob charlie))
+
+;; Add rules
+(add-rule! kb '(grandparent ?x ?z)
+           '(and (parent ?x ?y)
+                 (parent ?y ?z)))
+
+;; Query the knowledge base
+(query kb '(grandparent alice ?who))
+;; => ((who . charlie))
+#+END_SRC
+
+** Advanced Features
+
+*** Pattern Matching
+
+#+BEGIN_SRC scheme
+(use-modules (reasoning patterns))
+
+(match-pattern '(?x likes ?y)
+               '(alice likes bob))
+;; => ((x . alice) (y . bob))
+#+END_SRC
+
+*** Logic Programming with miniKanren
+
+#+BEGIN_SRC scheme
+(use-modules (reasoning logic))
+
+(run* (q)
+  (fresh (x y)
+    (== q (list x y))
+    (membero x '(1 2 3))
+    (membero y '(a b c))))
+;; => ((1 a) (1 b) (1 c) (2 a) ...)
+#+END_SRC
+
+*** Explanation Generation
+
+#+BEGIN_SRC scheme
+(use-modules (reasoning explain))
+
+(explain-query kb '(grandparent alice charlie))
+;; => "grandparent(alice, charlie) because:
+;;     1. parent(alice, bob) [fact]
+;;     2. parent(bob, charlie) [fact]
+;;     3. grandparent(?x, ?z) :- parent(?x, ?y), parent(?y, ?z) [rule]"
+#+END_SRC
+
+* Architecture
+
+** Core Components
+
+1. *Reasoning Engine*: The heart of the system, implementing various inference strategies
+2. *Knowledge Base*: Persistent storage for facts, rules, and constraints
+3. *Pattern Matcher*: Unification and pattern matching algorithms
+4. *Query Processor*: Handles complex queries with optimization
+5. *Explanation Generator*: Produces human-readable reasoning chains
+
+** Design Principles
+
+- *Functional Purity*: Immutable data structures and pure functions where possible
+- *Composability*: Small, composable functions that can be combined
+- *Extensibility*: Plugin architecture for custom reasoning strategies
+- *Performance*: Optimized algorithms with parallel processing support
+- *Transparency*: Clear reasoning chains and explainable AI
+
+* Research & Experiments
+
+The =research/= directory contains ongoing investigations into:
+
+- Probabilistic reasoning and uncertain inference
+- Temporal logic and reasoning about time
+- Non-monotonic reasoning and belief revision
+- Integration with neural networks for hybrid AI systems
+- Distributed reasoning across multiple agents
+
+The =experiments/= directory includes:
+
+- Novel inference algorithms
+- Performance optimizations
+- Domain-specific reasoning modules
+- Integration experiments with external systems
+
+* Benchmarks
+
+Performance benchmarks comparing different reasoning strategies:
+
+#+BEGIN_SRC bash
+gmake benchmark
+#+END_SRC
+
+Results are stored in =benchmarks/results/= with detailed performance metrics.
+
+* Development
+
+** Running Tests
+
+#+BEGIN_SRC bash
+# Run all tests
+gmake test
+
+# Run specific test suite
+guile -L src -L lib tests/test-inference.scm
+#+END_SRC
+
+** Code Quality
+
+#+BEGIN_SRC bash
+# Static analysis
+gmake check
+
+# Linting
+gmake lint
+#+END_SRC
+
+** Contributing
+
+1. Fork the repository
+2. Create a feature branch (~git checkout -b feature/amazing-feature~)
+3. Commit changes using conventional commits
+4. Push to the branch (~git push origin feature/amazing-feature~)
+5. Open a Pull Request
+
+* Documentation
+
+Comprehensive documentation is available in the =docs/= directory:
+
+- [[file:docs/api.org][API Reference]] - Complete API documentation
+- [[file:docs/tutorial.org][Tutorial]] - Step-by-step guide for beginners
+- [[file:docs/theory.org][Theory]] - Theoretical foundations and algorithms
+- [[file:docs/examples.org][Examples]] - Practical usage examples
+
+* Related Projects
+
+This project integrates with and builds upon:
+
+- [[https://github.com/dsp-dr/guile-git-scratch/][guile-git-scratch]] - Git integration utilities
+- [[https://github.com/dsp-dr/guile-llm-scratch/][guile-llm-scratch]] - LLM integration experiments
+- [[https://github.com/dsp-dr/guile-monkey-interpreter/][guile-monkey-interpreter]] - Interpreter implementation
+- [[https://github.com/dsp-dr/guile-orchestrator-scratch/][guile-orchestrator-scratch]] - Process orchestration tools
+
+* References
+
+- Norvig, P. (1992). /Paradigms of Artificial Intelligence Programming/
+- Russell, S. & Norvig, P. (2020). /Artificial Intelligence: A Modern Approach/
+- Friedman, D. P., Byrd, W. E., & Kiselyov, O. (2018). /The Reasoned Schemer/
+- Bratko, I. (2011). /Prolog Programming for Artificial Intelligence/
+
+* License
+
+This project is licensed under the MIT License - see the [[file:LICENSE][LICENSE]] file for details.
+
+* Contact
+
+- GitHub: [[https://github.com/dsp-dr][@dsp-dr]]
+- Issues: [[https://github.com/dsp-dr/guile-reasoning-model/issues][GitHub Issues]]
