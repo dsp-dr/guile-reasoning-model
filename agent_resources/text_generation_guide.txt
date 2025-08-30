@@ -1,0 +1,43 @@
+Text Generation Development Guide
+=================================
+
+CURRENT STATUS:
+- Basic tokenizer framework in src/generation/text-gen.scm
+- Special reasoning tokens defined
+- Simple sampling strategies implemented
+
+PRIORITY TASKS:
+1. Complete tokenizer encode/decode functions
+2. Add advanced sampling strategies (nucleus, top-k)
+3. Implement reasoning-aware text generation
+4. Add streaming generation support
+5. Create prompt templates for reasoning
+
+KEY FUNCTIONS TO WORK ON:
+- tokenize-text: Handle edge cases and special tokens
+- generate-text: Improve quality and consistency
+- apply-temperature: Better probability distributions
+- format-reasoning-chain: Human-readable output
+
+SPECIAL REQUIREMENTS:
+- Must handle reasoning step markers
+- Should preserve logical structure in output
+- Need to support multiple output formats
+- Integration with Ollama for LLM generation
+
+QUALITY TARGETS:
+- Tokenization accuracy >95%
+- Generation coherence >80%
+- Reasoning preservation >90%
+- Response time <2s per chain
+
+INTEGRATION POINTS:
+- Takes reasoning chains from core.scm
+- Provides formatted output for evaluation
+- Works with Ollama for LLM-based generation
+
+NEXT IMMEDIATE ACTIONS:
+- Fix any tokenization bugs
+- Add more sophisticated sampling
+- Implement chain-to-text conversion
+- Test with various reasoning patterns

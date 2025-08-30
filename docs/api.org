@@ -1,0 +1,373 @@
+#+TITLE: Guile Reasoning Model - API Reference
+#+AUTHOR: Generated Documentation
+#+DATE: 2025-08-30
+#+OPTIONS: toc:3 num:t
+
+* Overview
+
+The Guile Reasoning Model provides a comprehensive API for symbolic reasoning, inference scaling, and evaluation. This document covers all public functions and modules.
+
+* Core Reasoning Module (~(reasoning core)~)
+
+** Types
+
+*** ~<reasoning-step>~
+Record type representing a single step in a reasoning chain.
+
+#+BEGIN_SRC scheme
+(make-reasoning-step description computation result)
+#+END_SRC
+
+*Fields:*
+- ~description~ (string): Human-readable description of the step
+- ~computation~ (any): The computation or operation performed  
+- ~result~ (any): Result of the computation
+
+*Predicates:*
+- ~(reasoning-step? obj)~ → boolean
+
+*Accessors:*
+- ~(reasoning-step-description step)~ → string
+- ~(reasoning-step-computation step)~ → any
+- ~(reasoning-step-result step)~ → any
+
+*** ~<reasoning-chain>~
+Record type representing a complete reasoning chain.
+
+#+BEGIN_SRC scheme
+(make-reasoning-chain problem #:key steps answer confidence)
+#+END_SRC
+
+*Fields:*
+- ~problem~ (string): The problem being solved
+- ~steps~ (list): List of reasoning-step objects
+- ~answer~ (any): Final answer
+- ~confidence~ (number): Confidence score (0.0-1.0)
+
+*Predicates:*
+- ~(reasoning-chain? obj)~ → boolean
+
+*Accessors:*
+- ~(reasoning-chain-problem chain)~ → string
+- ~(reasoning-chain-steps chain)~ → list
+- ~(reasoning-chain-answer chain)~ → any
+- ~(reasoning-chain-confidence chain)~ → number
+
+** Functions
+
+*** ~(chain-of-thought problem reasoning-fn)~
+Apply chain-of-thought reasoning to a problem.
+
+*Parameters:*
+- ~problem~ (string): Problem to solve
+- ~reasoning-fn~ (procedure): Function that generates reasoning steps
+
+*Returns:* ~<reasoning-chain>~
+
+*Example:*
+#+BEGIN_SRC scheme
+(define simple-math-reasoning
+  (lambda (problem)
+    (list (make-reasoning-step "Parse numbers" 'parse "2, 3")
+          (make-reasoning-step "Add numbers" '+ 5))))
+
+(chain-of-thought "What is 2 + 3?" simple-math-reasoning)
+#+END_SRC
+
+*** ~(apply-reasoning chain step)~
+Add a reasoning step to an existing chain.
+
+*Parameters:*
+- ~chain~ (~<reasoning-chain>~): Existing reasoning chain
+- ~step~ (~<reasoning-step>~): New step to add
+
+*Returns:* Updated ~<reasoning-chain>~
+
+*** ~(get-reasoning-steps chain)~
+Extract all reasoning steps from a chain.
+
+*Parameters:*
+- ~chain~ (~<reasoning-chain>~): Reasoning chain
+
+*Returns:* List of ~<reasoning-step>~ objects
+
+*** ~(get-final-answer chain)~
+Get the final answer from a reasoning chain.
+
+*Parameters:*
+- ~chain~ (~<reasoning-chain>~): Reasoning chain
+
+*Returns:* Final answer (any type)
+
+*** ~(decompose-problem problem)~
+Decompose a complex problem into sub-problems.
+
+*Parameters:*
+- ~problem~ (string): Complex problem
+
+*Returns:* List of sub-problems (strings)
+
+*** ~(identify-reasoning-type problem)~
+Identify the type of reasoning required for a problem.
+
+*Parameters:*
+- ~problem~ (string): Problem to analyze
+
+*Returns:* Symbol representing reasoning type:
+- ~'logical~ - Logical reasoning
+- ~'mathematical~ - Mathematical computation
+- ~'causal~ - Causal reasoning
+- ~'comparative~ - Comparison reasoning
+- ~'general~ - General reasoning
+- ~'unknown~ - Cannot determine
+
+** Utility Functions
+
+*** ~(verify-consistency steps)~
+Check for logical consistency in reasoning steps.
+
+*Parameters:*
+- ~steps~ (list): List of ~<reasoning-step>~ objects
+
+*Returns:* Boolean indicating consistency
+
+* Inference Scaling Module (~(reasoning inference)~)
+
+** Self-Consistency Functions
+
+*** ~(self-consistency problem reasoning-fn #:key num-samples)~
+Generate multiple reasoning chains and aggregate results.
+
+*Parameters:*
+- ~problem~ (string): Problem to solve
+- ~reasoning-fn~ (procedure): Reasoning function
+- ~num-samples~ (integer, optional): Number of chains to generate (default: 5)
+
+*Returns:* ~<reasoning-chain>~ with aggregated results
+
+*Example:*
+#+BEGIN_SRC scheme
+(self-consistency "What is 15% of 200?" 
+                   math-reasoning-fn 
+                   #:num-samples 10)
+#+END_SRC
+
+### ~(majority-voting candidates)~
+Simple majority voting among candidate answers.
+
+*Parameters:*
+- ~candidates~ (list): List of candidate answers
+
+*Returns:* Most frequent answer
+
+*** ~(weighted-voting candidates weights)~
+Weighted voting based on confidence scores.
+
+*Parameters:*
+- ~candidates~ (list): List of candidate answers
+- ~weights~ (list): List of weights (numbers)
+
+*Returns:* Weighted majority answer
+
+** Beam Search Functions
+
+*** ~(beam-search-reasoning problem expand-fn score-fn #:key beam-width max-depth)~
+Beam search through reasoning paths.
+
+*Parameters:*
+- ~problem~ (string): Problem to solve
+- ~expand-fn~ (procedure): Function to expand states
+- ~score-fn~ (procedure): Function to score states
+- ~beam-width~ (integer, optional): Width of beam (default: 3)
+- ~max-depth~ (integer, optional): Maximum search depth (default: 5)
+
+*Returns:* Best ~<beam-state>~
+
+** Monte Carlo Functions
+
+*** ~(monte-carlo-reasoning problem simulate-fn evaluate-fn #:key num-simulations)~
+Monte Carlo tree search for reasoning.
+
+*Parameters:*
+- ~problem~ (string): Problem to solve
+- ~simulate-fn~ (procedure): Simulation function
+- ~evaluate-fn~ (procedure): Evaluation function  
+- ~num-simulations~ (integer, optional): Number of simulations (default: 100)
+
+*Returns:* Best simulation result
+
+** Temperature Functions
+
+*** ~(temperature-sampling scores #:key temperature)~
+Sample from a distribution with temperature scaling.
+
+*Parameters:*
+- ~scores~ (list): List of scores (numbers)
+- ~temperature~ (number, optional): Temperature parameter (default: 1.0)
+
+*Returns:* Sampled index (integer)
+
+* Text Generation Module (~(generation text-gen)~)
+
+** Tokenizer Functions
+
+*** ~(make-tokenizer vocab special-tokens)~
+Create a new tokenizer instance.
+
+*Parameters:*
+- ~vocab~ (list): Vocabulary list
+- ~special-tokens~ (list): List of special tokens
+
+*Returns:* ~<tokenizer>~ object
+
+*** ~(tokenize tokenizer text)~
+Tokenize text into a list of tokens.
+
+*Parameters:*
+- ~tokenizer~ (~<tokenizer>~): Tokenizer instance
+- ~text~ (string): Text to tokenize
+
+*Returns:* List of tokens (strings)
+
+*** ~(encode tokenizer tokens)~
+Encode tokens into numerical IDs.
+
+*Parameters:*
+- ~tokenizer~ (~<tokenizer>~): Tokenizer instance
+- ~tokens~ (list): List of tokens (strings)
+
+*Returns:* List of token IDs (integers)
+
+*** ~(decode tokenizer ids)~
+Decode numerical IDs back into tokens.
+
+*Parameters:*
+- ~tokenizer~ (~<tokenizer>~): Tokenizer instance
+- ~ids~ (list): List of token IDs (integers)
+
+*Returns:* List of tokens (strings)
+
+## Text Generation Functions
+
+### ~(generate-text generator prompt #:key max-tokens temperature)~
+Generate text using the reasoning model.
+
+*Parameters:*
+- ~generator~ (~<text-generator>~): Generator instance
+- ~prompt~ (string): Input prompt
+- ~max-tokens~ (integer, optional): Maximum tokens to generate
+- ~temperature~ (number, optional): Sampling temperature
+
+*Returns:* Generated text (string)
+
+** Sampling Functions
+
+*** ~(apply-temperature logits temperature)~
+Apply temperature scaling to logits.
+
+*Parameters:*
+- ~logits~ (list): List of logits (numbers)
+- ~temperature~ (number): Temperature parameter
+
+*Returns:* Temperature-scaled probabilities (list)
+
+* Integration Examples
+
+** Basic Chain-of-Thought Reasoning
+
+#+BEGIN_SRC scheme
+(use-modules (reasoning core))
+
+(define (simple-math-reasoning problem)
+  (list (make-reasoning-step "Identify operation" 'parse "addition")
+        (make-reasoning-step "Extract numbers" 'extract '(2 3))
+        (make-reasoning-step "Perform calculation" '+ 5)))
+
+(define result (chain-of-thought "What is 2 + 3?" simple-math-reasoning))
+(display (get-final-answer result)) ; → 5
+#+END_SRC
+
+** Self-Consistency with Multiple Samples
+
+#+BEGIN_SRC scheme
+(use-modules (reasoning core)
+             (reasoning inference))
+
+(define consistent-result 
+  (self-consistency "Calculate 15% of 200"
+                    percentage-reasoning-fn
+                    #:num-samples 5))
+
+(display (reasoning-chain-confidence consistent-result))
+#+END_SRC
+
+** Beam Search Reasoning
+
+#+BEGIN_SRC scheme
+(use-modules (reasoning inference))
+
+(define (expand-math-state state)
+  ;; Generate possible next steps
+  '(add subtract multiply divide))
+
+(define (score-math-step step path)
+  ;; Score based on step quality
+  (if (eq? step 'add) 0.8 0.3))
+
+(define best-path
+  (beam-search-reasoning "Solve: 2x + 5 = 13"
+                        expand-math-state
+                        score-math-step
+                        #:beam-width 3))
+#+END_SRC
+
+* Error Handling
+
+All functions may throw the following exceptions:
+
+** ~reasoning-error~
+General reasoning error.
+
+** ~invalid-chain-error~
+Invalid reasoning chain structure.
+
+** ~consistency-error~
+Logical consistency violation.
+
+** ~evaluation-error~
+Error during evaluation or scoring.
+
+* Performance Notes
+
+** Memory Usage
+- Reasoning chains: ~O(n)~ where n = number of steps
+- Self-consistency: ~O(k*n)~ where k = number of samples
+- Beam search: ~O(w*d)~ where w = beam width, d = depth
+
+** Time Complexity
+- Chain creation: ~O(n)~
+- Self-consistency: ~O(k*T)~ where T = reasoning time
+- Beam search: ~O(w*d*E)~ where E = expansion time
+
+* Version History
+
+** v0.1.0 (Current)
+- Basic reasoning chain implementation
+- Self-consistency and beam search
+- Simple text generation
+- Initial evaluation framework
+
+** Planned v0.2.0
+- Enhanced evaluation metrics
+- Benchmark suite integration
+- Performance optimizations
+
+** Planned v1.0.0
+- Production-ready API
+- Comprehensive documentation
+- Full Ollama integration
+- Advanced inference techniques
+
+---
+
+*This documentation is automatically updated by the reasoning model agent system.*

@@ -1,0 +1,37 @@
+Inference Scaling Development Guide
+===================================
+
+CURRENT STATUS:
+- Self-consistency, beam search, Monte Carlo methods implemented
+- Temperature sampling and verification methods exist
+- Basic voting and aggregation functions working
+
+PRIORITY TASKS:
+1. Optimize beam search performance and accuracy
+2. Enhance Monte Carlo simulation quality
+3. Improve voting strategies (weighted, ranked)
+4. Add parallel processing for multiple chains
+5. Implement advanced verification methods
+
+KEY FUNCTIONS TO WORK ON:
+- beam-search-reasoning: Better pruning strategies
+- monte-carlo-reasoning: More sophisticated simulation
+- weighted-voting: Implement confidence-based weights
+- verify-reasoning-step: Add semantic consistency checks
+
+PERFORMANCE TARGETS:
+- Self-consistency: >80% agreement on correct answers
+- Beam search: 3x better than greedy search
+- Monte Carlo: Stable results with 100+ simulations
+- Response time: <5s for complex reasoning
+
+INTEGRATION POINTS:
+- Uses core.scm reasoning chains
+- Provides results to evaluation framework
+- Should work with Ollama integration
+
+NEXT IMMEDIATE ACTIONS:
+- Profile current performance bottlenecks
+- Add caching for expensive operations
+- Implement parallel chain generation
+- Test scaling with larger beam widths

@@ -1,0 +1,31 @@
+Reasoning Core Development Guide
+===============================
+
+CURRENT STATUS:
+- Basic chain-of-thought implementation exists in src/reasoning/core.scm
+- Record types: reasoning-step, reasoning-chain defined
+- Functions: chain-of-thought, apply-reasoning implemented
+
+PRIORITY TASKS:
+1. Enhance problem decomposition algorithms
+2. Improve consistency verification methods
+3. Add more reasoning patterns (causal, comparative, mathematical)
+4. Implement step validation and error detection
+5. Add confidence calculation improvements
+
+KEY FUNCTIONS TO WORK ON:
+- decompose-problem: Make it more sophisticated
+- verify-consistency: Add deeper logical checks  
+- identify-reasoning-type: Expand pattern matching
+- calculate-confidence: Use more factors
+
+INTEGRATION POINTS:
+- Must work with inference.scm for scaling
+- Should integrate with text-gen.scm for output
+- Needs evaluation metrics from experiments/
+
+NEXT IMMEDIATE ACTIONS:
+- Read current core.scm implementation
+- Identify gaps in reasoning patterns
+- Add new reasoning step types
+- Improve error handling and validation

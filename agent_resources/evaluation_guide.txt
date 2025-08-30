@@ -1,0 +1,41 @@
+Evaluation Framework Development Guide
+======================================
+
+CURRENT STATUS:
+- Comprehensive metrics dashboard implemented
+- 6 core metrics: accuracy, coherence, completeness, efficiency, consistency, verbosity
+- Visualization system with 12-panel dashboard
+- Basic benchmark problems created
+
+PRIORITY TASKS:
+1. Expand benchmark problem database (target: 100+ problems)
+2. Add domain-specific evaluation metrics
+3. Implement cross-model comparison framework
+4. Create automated testing pipeline
+5. Add real-time performance monitoring
+
+KEY AREAS TO EXPAND:
+- Mathematical reasoning benchmarks
+- Logical reasoning test cases  
+- Common sense reasoning problems
+- Multi-step reasoning challenges
+- Edge case detection
+
+METRICS TO ADD:
+- Reasoning depth analysis
+- Step necessity scoring
+- Logical validity checking
+- Cross-consistency verification
+- Performance regression detection
+
+INTEGRATION TARGETS:
+- Real-time evaluation of Guile reasoning chains
+- Comparison with Ollama model outputs
+- Integration with CI/CD for quality gates
+- Export to multiple formats (JSON, CSV, plots)
+
+NEXT IMMEDIATE ACTIONS:
+- Create 20 new benchmark problems
+- Add domain-specific metrics
+- Implement automated test running
+- Set up performance regression alerts
