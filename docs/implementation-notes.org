@@ -1,0 +1,31 @@
+#+TITLE: Implementation Notes
+#+AUTHOR: dsp-dr
+
+* Design Decisions
+
+** Why Guile?
+
+- Exploring functional implementation of neural network concepts
+- Leveraging Guile's macro system for DSL creation
+- Integration with existing Guile ecosystem projects
+
+** Architecture Mapping
+
+| Book (Python/PyTorch) | Guile Implementation |
+|-----------------------|---------------------|
+| torch.Tensor          | SRFI-43 vectors     |
+| nn.Module             | Record types        |
+| Autograd              | Manual gradients    |
+| CUDA/GPU              | CPU only (for now)  |
+
+** Challenges
+
+1. No native tensor operations - using vectors
+2. No automatic differentiation - manual backprop
+3. Performance limitations - focus on algorithms
+
+** Future Directions
+
+- FFI bindings to NumPy/PyTorch
+- Pure Scheme neural network framework
+- Focus on symbolic reasoning aspects

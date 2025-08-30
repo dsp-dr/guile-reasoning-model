@@ -1,0 +1,307 @@
+#+TITLE: Book to Guile3: Decomposition Process
+#+AUTHOR: dsp-dr
+#+DATE: 2025-08-30
+#+OPTIONS: toc:2 num:t reveal_center:t reveal_progress:t reveal_history:t
+#+REVEAL_THEME: white
+#+REVEAL_TRANS: slide
+
+* Overview
+:PROPERTIES:
+:reveal_background: #f0f0f0
+:END:
+
+** Project Goal
+
+Transform "Build a Reasoning Model (From Scratch)" from Python/PyTorch implementation to idiomatic Guile Scheme
+
+** Why This Translation?
+
+- Explore functional programming paradigms in AI
+- Leverage Scheme's homoiconicity for metaprogramming
+- Create educational implementation focused on concepts
+- Build foundation for symbolic-neural hybrid systems
+
+* Decomposition Strategy
+
+** Chapter Analysis
+
+| Chapter | Topic | Guile Approach |
+|---------|-------|----------------|
+| 1 | Introduction | Conceptual mapping |
+| 2 | Tokenization | Pure functional BPE |
+| 3 | Evaluation | SRFI-64 test framework |
+| 4 | Inference Scaling | Lazy evaluation |
+| 5 | Training (RL) | Manual gradients |
+| 6 | Distillation | Functional transforms |
+
+** Key Transformations
+
+*** Python Classes → Scheme Records
+
+#+BEGIN_SRC python
+class Tokenizer:
+    def __init__(self, vocab):
+        self.vocab = vocab
+    
+    def encode(self, text):
+        # encoding logic
+#+END_SRC
+
+*** Becomes:
+
+#+BEGIN_SRC scheme
+(define-record-type <tokenizer>
+  (make-tokenizer vocab encode-proc decode-proc special-tokens)
+  tokenizer?
+  (vocab tokenizer-vocab)
+  (encode-proc tokenizer-encode-proc))
+#+END_SRC
+
+* Implementation Mapping
+
+** Data Structures
+
+*** Python/PyTorch → Guile
+
+| Python | Guile | Notes |
+|--------|-------|-------|
+| torch.Tensor | SRFI-43 vectors | Immutable by default |
+| numpy.array | SRFI-63 arrays | Multi-dimensional |
+| dict | Hash tables | Native support |
+| class | Record types | SRFI-9 |
+| generator | SRFI-41 streams | Lazy sequences |
+
+** Core Concepts
+
+*** Tensors → Vectors
+
+- PyTorch tensors become nested vectors
+- Manual broadcasting implementation
+- Functional operations over imperative
+
+*** Autograd → Manual Differentiation
+
+- Explicit gradient computation
+- Symbolic differentiation where possible
+- Focus on understanding over performance
+
+* Code Organization
+
+** Module Structure
+
+#+BEGIN_EXAMPLE
+src/
+├── tokenizer/
+│   ├── base.scm        # Core tokenizer interface
+│   ├── bpe.scm         # Byte-pair encoding
+│   └── vocab.scm       # Vocabulary management
+├── model/
+│   ├── base.scm        # Model interface
+│   ├── attention.scm   # Self-attention mechanisms
+│   └── transformer.scm # Transformer architecture
+├── generation/
+│   ├── basic.scm       # Sequential generation
+│   └── kv-cache.scm    # Key-value caching
+└── inference/
+    ├── scaling.scm     # Inference optimizations
+    └── reasoning.scm   # Chain-of-thought
+#+END_EXAMPLE
+
+** Literate Programming Approach
+
+- SETUP.org as master document
+- Org-babel for code tangling
+- Documentation embedded with code
+- Reproducible development environment
+
+* Functional Patterns
+
+** Immutability First
+
+*** Python (Mutable)
+#+BEGIN_SRC python
+def update_cache(cache, key, value):
+    cache[key] = value  # Mutates
+    return cache
+#+END_SRC
+
+*** Guile (Immutable)
+#+BEGIN_SRC scheme
+(define (update-cache cache key value)
+  (hash-set cache key value))  ; Returns new
+#+END_SRC
+
+** Higher-Order Functions
+
+*** Replace Loops with Recursion
+
+#+BEGIN_SRC scheme
+(define (generate-tokens model prompt max-tokens)
+  (let loop ((tokens (encode prompt))
+             (count 0))
+    (if (>= count max-tokens)
+        tokens
+        (loop (append tokens 
+                     (list (predict-next model tokens)))
+              (+ count 1)))))
+#+END_SRC
+
+* Challenges & Solutions
+
+** Challenge 1: Performance
+
+*** Problem
+- No GPU acceleration
+- Interpreted language overhead
+- No optimized matrix operations
+
+*** Solution
+- Focus on algorithmic clarity
+- Use for education/prototyping
+- FFI bindings for critical paths
+
+** Challenge 2: Libraries
+
+*** Problem
+- No native deep learning framework
+- Limited scientific computing tools
+
+*** Solution
+- Implement core algorithms from scratch
+- Educational opportunity
+- Potential for novel approaches
+
+* Unique Advantages
+
+** Metaprogramming
+
+*** Macro System
+- Generate model architectures
+- DSL for model definition
+- Compile-time optimizations
+
+#+BEGIN_SRC scheme
+(define-syntax define-layer
+  (syntax-rules ()
+    ((define-layer name input-dim output-dim)
+     (define name
+       (make-layer input-dim output-dim
+                  (random-weights input-dim output-dim))))))
+#+END_SRC
+
+** Symbolic Integration
+
+*** Hybrid Reasoning
+- Combine neural and symbolic
+- Logic programming via miniKanren
+- Rule-based post-processing
+
+#+BEGIN_SRC scheme
+(run* (q)
+  (fresh (reasoning step conclusion)
+    (neural-predict model input reasoning)
+    (logical-verify reasoning step)
+    (derive-conclusion step conclusion)
+    (== q conclusion)))
+#+END_SRC
+
+* Development Workflow
+
+** Iterative Process
+
+1. Read book chapter
+2. Identify core concepts
+3. Map to functional equivalents
+4. Implement in Guile
+5. Test and validate
+6. Document insights
+
+** Tools & Techniques
+
+- Emacs + Geiser for development
+- Org-mode for literate programming
+- SRFI-64 for testing
+- Git for version control
+- GitHub for collaboration
+
+* Testing Strategy
+
+** Unit Tests
+
+#+BEGIN_SRC scheme
+(test-begin "tokenizer")
+
+(test-assert "Create tokenizer"
+  (tokenizer? (make-tokenizer ...)))
+
+(test-equal "Encode simple text"
+  '(1 2 3)
+  (encode tokenizer "hello world"))
+
+(test-end "tokenizer")
+#+END_SRC
+
+** Integration Tests
+
+- End-to-end generation
+- Performance benchmarks
+- Comparison with reference implementation
+
+* Future Directions
+
+** Short Term
+
+- Complete core modules
+- Implement basic transformer
+- Add comprehensive tests
+- Documentation improvements
+
+** Long Term
+
+- FFI bindings to PyTorch
+- Distributed reasoning
+- Novel architectures
+- Integration with Guile ecosystem
+
+** Research Opportunities
+
+- Functional neural architectures
+- Symbolic-neural hybrids
+- Macro-based model generation
+- Lazy evaluation strategies
+
+* Collaboration
+
+** Contributing
+
+- GitHub: [[https://github.com/dsp-dr/guile-reasoning-model]]
+- Issues for discussion
+- Pull requests welcome
+- Documentation contributions valued
+
+** Related Projects
+
+- guile-llm-scratch
+- guile-orchestrator-scratch
+- guile-monkey-interpreter
+- guile-git-scratch
+
+* Conclusion
+
+** Key Takeaways
+
+- Functional programming offers unique insights
+- Educational value in reimplementation
+- Foundation for novel approaches
+- Community collaboration essential
+
+** Questions?
+
+Contact: @dsp-dr on GitHub
+
+*** Resources
+
+- Book: "Build a Reasoning Model (From Scratch)"
+- Guile Manual: [[https://www.gnu.org/software/guile/]]
+- SRFI Documents: [[https://srfi.schemers.org/]]
+- Project Repo: [[https://github.com/dsp-dr/guile-reasoning-model]]
